@@ -195,7 +195,7 @@ body.no-scroll{overflow:hidden;position:fixed;width:100%}
   </div>
 </div>
 <div class="container" id="app"></div>
-<div class="footer">435题 · 细胞生物学题库</div>
+<div class="footer">451题 · 细胞生物学题库</div>
 <div class="toast" id="toast"></div>
 
 <script src="data.js"></script>
@@ -257,7 +257,7 @@ function renderHome(){
     const c=ch.questions.filter((_,qi)=>done[buildId(ci,qi)]==='correct').length;
     const p=d?Math.round(c/d*100):0;
     const cls=p>=70?'green':p>=40?'blue':'orange';
-    chCards+=`<div class="ch-card" onclick="startQuiz(${ci})">
+    chCards+=`<div class="ch-card" onclick="showQuizSetup(${ci})">
       <div class="ch-name">${ch.chapter}</div>
       <div class="ch-meta">${d}/${ch.questions.length} · ${p}%</div>
       <div class="ch-bar"><div class="fill ${cls}" style="width:${d?Math.round(d/ch.questions.length*100):0}%"></div></div>
@@ -274,7 +274,7 @@ function renderHome(){
         <div><div class="num">${pct}%</div><div class="lbl">正确率</div></div>
         ${days?`<div><div class="num">${days}</div><div class="lbl">连续天数</div></div>`:''}
       </div>
-      <button class="hero-btn" onclick="startQuiz(-1)">▶ 开始练习</button>
+      <button class="hero-btn" onclick="showQuizSetup(-1)">▶ 开始练习</button>
     </div>
     <div class="quick-actions">
       <div class="quick-btn" onclick="wrong.length?goWrong():showToast('暂无错题')">
@@ -306,15 +306,67 @@ function renderHome(){
 // ====== QUIZ ======
 let quizQ=[],quizI=0,quizAns=false,quizRes={c:0,w:0,t:0};
 
+const ALL_TYPES=['选择题','判断题','填空题','名词解释','简答题','论述题'];
+
+function showQuizSetup(chIdx){
+  const app=document.getElementById('app');
+  const chName=chIdx>=0?QUESTION_BANK[chIdx].chapter:'全部章节';
+  // Count questions per type for this chapter(s)
+  let cnt={};
+  ALL_TYPES.forEach(t=>cnt[t]=0);
+  QUESTION_BANK.forEach((ch,ci)=>{
+    if(chIdx>=0&&ci!==chIdx)return;
+    ch.questions.forEach(q=>{if(cnt[q.type]!==undefined)cnt[q.type]++;});
+  });
+  let checks=ALL_TYPES.map(t=>`<label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s;background:var(--bg)">
+    <input type="checkbox" checked onchange="updateTypeSel()" data-type="${t}" style="width:16px;height:16px;accent-color:var(--primary)">
+    <span>${t}</span>
+    <span style="margin-left:auto;font-size:12px;color:var(--text2)">${cnt[t]}题</span>
+  </label>`).join('');
+
+  app.innerHTML=`
+    <div style="background:var(--card);border-radius:var(--radius);padding:28px 24px;box-shadow:var(--shadow-lg);max-width:480px;margin:20px auto">
+      <h2 style="font-size:18px;margin-bottom:4px">📝 练习设置</h2>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">${chName}</p>
+      <div style="font-size:14px;font-weight:600;margin-bottom:8px">选择题型：</div>
+      <div id="typeChecks" style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px">${checks}</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:20px">
+        <span style="font-size:14px">题目数量：</span>
+        <select id="qCount" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:14px">
+          <option value="10">10 题</option>
+          <option value="20" selected>20 题</option>
+          <option value="30">30 题</option>
+          <option value="50">50 题</option>
+          <option value="0">全部</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn-p" onclick="startQuiz(${chIdx})" style="flex:1;padding:12px;font-size:15px">开始练习 🚀</button>
+        <button class="btn-g" onclick="renderHome()" style="padding:12px 20px;font-size:14px">取消</button>
+      </div>
+    </div>
+  `;
+  window._selTypes=ALL_TYPES.slice(); // default all
+}
+
+function updateTypeSel(){
+  const checks=document.querySelectorAll('#typeChecks input:checked');
+  window._selTypes=[...checks].map(c=>c.dataset.type);
+}
+
 function startQuiz(chIdx){
+  const selTypes=window._selTypes||ALL_TYPES;
+  const max=parseInt(document.getElementById('qCount')?.value||'20');
   let pool=[];
   QUESTION_BANK.forEach((ch,ci)=>{
     if(chIdx>=0&&ci!==chIdx)return;
-    ch.questions.forEach((q,qi)=>pool.push({...q,_ch:ci,_qi:qi,_id:buildId(ci,qi)}));
+    ch.questions.forEach((q,qi)=>{
+      if(selTypes.includes(q.type))pool.push({...q,_ch:ci,_qi:qi,_id:buildId(ci,qi)});
+    });
   });
   pool.sort(()=>Math.random()-0.5);
-  if(pool.length>20)pool=pool.slice(0,20);
-  if(!pool.length)return;
+  if(max>0&&pool.length>max)pool=pool.slice(0,max);
+  if(!pool.length){showToast('没有符合条件的题目');return;}
   quizQ=pool;quizI=0;quizRes={c:0,w:0,t:pool.length};quizAns=false;
   renderQ();
 }
@@ -405,7 +457,7 @@ function renderQ(){
     <div class="q-card">
       <div class="q-num">第 ${quizI+1} 题</div>
       <span class="q-tag ${tagCls}">${q.type}</span>
-      <div class="q-text">${q.q}</div>
+      ${q.type==='名词解释'?renderTermQ(q.q):`<div class="q-text">${q.q}</div>`}
       ${opts}
       ${judge}
       ${fb}
@@ -467,6 +519,31 @@ function ansJudge(qid,ans){
   document.getElementById('nextBtn').focus();
 }
 
+function renderTermQ(q){
+  // Parse "中文（English）" or "中文" format
+  const m=q.match(/（(.+?)）|\((.+?)\)/);
+  const eng=m?(m[1]||m[2]):'';
+  const cn=q.replace(/[（(].+?[）)]/,'').trim();
+  if(eng) return `<div style="font-size:22px;font-weight:700;text-align:center;padding:12px 0;color:var(--primary);letter-spacing:.5px">${eng}</div>
+    <div style="text-align:center;font-size:13px;color:var(--text2);margin-bottom:4px">请写出中文名称并解释</div>`;
+  return `<div class="q-text">${q}</div>`;
+}
+
+function getAns(q){
+  if(q.type==='名词解释'){
+    const m=q.q.match(/（(.+?)）|\((.+?)\)/);
+    const eng=m?(m[1]||m[2]):'';
+    const cn=q.q.replace(/[（(].+?[）)]/,'').trim();
+    return cn+'（'+eng+'）: '+q.answer;
+  }
+  if(q.type==='选择题'&&q.opts){
+    const an=(q.answer||'').replace(/[、．\s]/g,'').toUpperCase();
+    for(const o of q.opts){if(an===o.charAt(0).toUpperCase()||q.answer.includes(o))return o;}
+  }
+  if(q.type==='判断题')return q.answer==='√'?'正确':'错误';
+  return q.answer||'';
+}
+
 function revealAnswer(qid){
   const q=findQ(qid);if(!q)return;
   const el=document.getElementById('qa');
@@ -515,14 +592,6 @@ function showResults(){
   `;
 }
 
-function getAns(q){
-  if(q.type==='选择题'&&q.opts){
-    const an=(q.answer||'').replace(/[、．\s]/g,'').toUpperCase();
-    for(const o of q.opts){if(an===o.charAt(0).toUpperCase()||q.answer.includes(o))return o;}
-  }
-  if(q.type==='判断题')return q.answer==='√'?'正确':'错误';
-  return q.answer||'';
-}
 
 // ====== BROWSE ======
 function showBrowse(){
