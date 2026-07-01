@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>细胞生物学</title>
+<style>
+:root{--bg:#f8fafc;--card:#fff;--text:#0f172a;--text2:#64748b;--border:#e2e8f0;--primary:#2563eb;--primary-light:#eff6ff;--primary-dark:#1d4ed8;--correct:#059669;--correct-bg:#ecfdf5;--wrong:#dc2626;--wrong-bg:#fef2f2;--shadow:0 1px 3px rgba(0,0,0,.06);--shadow-lg:0 8px 30px rgba(0,0,0,.12);--radius:16px;--radius-sm:10px;--transition:.2s}
+.dark{--bg:#0f172a;--card:#1e293b;--text:#e2e8f0;--text2:#94a3b8;--border:#334155;--primary:#60a5fa;--primary-light:#1e3a5f;--primary-dark:#93c5fd;--correct:#34d399;--correct-bg:#064e3b;--wrong:#f87171;--wrong-bg:#7f1d1d;--shadow:0 1px 3px rgba(0,0,0,.3);--shadow-lg:0 8px 30px rgba(0,0,0,.4)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background var(--transition),color var(--transition);overflow-x:hidden}
+body.no-scroll{overflow:hidden;position:fixed;width:100%}
+
+/* Header */
+.header{background:linear-gradient(135deg,#1e3a5f,#0f172a);color:#fff;padding:16px 20px;position:sticky;top:0;z-index:100}
+.dark .header{background:linear-gradient(135deg,#0f172a,#020617)}
+.header-inner{max-width:800px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:17px;font-weight:700;display:flex;align-items:center;gap:6px}
+.header-actions{display:flex;gap:6px}
+.header-actions button{padding:5px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;cursor:pointer;font-size:12px;transition:all var(--transition)}
+.header-actions button:hover{background:rgba(255,255,255,.2)}
+
+/* Container */
+.container{max-width:800px;margin:0 auto;padding:20px 16px 80px}
+.section-title{font-size:16px;font-weight:600;margin:20px 0 12px;display:flex;align-items:center;gap:6px;color:var(--text)}
+
+/* ===== Landing Dashboard ===== */
+.hero-card{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;border-radius:var(--radius);padding:28px 24px;margin-bottom:20px;position:relative;overflow:hidden}
+.hero-card::after{content:'';position:absolute;top:-50%;right:-30%;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.08)}
+.hero-greeting{font-size:22px;font-weight:700;margin-bottom:4px}
+.hero-sub{font-size:13px;opacity:.85;margin-bottom:16px}
+.hero-stats{display:flex;gap:24px;font-size:13px}
+.hero-stats div{text-align:center}
+.hero-stats .num{font-size:24px;font-weight:700}
+.hero-stats .lbl{font-size:11px;opacity:.7}
+.hero-btn{display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:12px 28px;border-radius:12px;border:none;background:rgba(255,255,255,.2);color:#fff;font-size:15px;font-weight:600;cursor:pointer;transition:all var(--transition);backdrop-filter:blur(10px)}
+.hero-btn:hover{background:rgba(255,255,255,.3);transform:translateY(-1px)}
+
+.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.quick-btn{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;cursor:pointer;transition:all var(--transition);text-align:left}
+.quick-btn:hover{border-color:var(--primary);box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+.quick-btn .icon{font-size:24px;margin-bottom:4px}
+.quick-btn .title{font-weight:600;font-size:14px}
+.quick-btn .desc{font-size:11px;color:var(--text2);margin-top:2px}
+
+/* Chapter Grid */
+.chapter-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ch-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;cursor:pointer;transition:all var(--transition)}
+.ch-card:hover{border-color:var(--primary);box-shadow:var(--shadow-lg);transform:translateY(-1px)}
+.ch-card .ch-name{font-size:13px;font-weight:600;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ch-card .ch-meta{font-size:11px;color:var(--text2)}
+.ch-card .ch-bar{height:4px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden}
+.ch-card .ch-bar .fill{height:100%;border-radius:2px;transition:width .6s}
+.ch-card .ch-bar .fill.green{background:var(--correct)}
+.ch-card .ch-bar .fill.blue{background:var(--primary)}
+.ch-card .ch-bar .fill.orange{background:#f59e0b}
+
+/* ===== Quiz Mode ===== */
+.quiz-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.quiz-progress{display:flex;align-items:center;gap:10px}
+.quiz-progress .count{font-size:14px;font-weight:600}
+.quiz-bar{width:100px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.quiz-bar .fill{height:100%;background:var(--primary);border-radius:2px;transition:width .4s}
+.quiz-exit{padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text2);cursor:pointer;font-size:12px;transition:all var(--transition)}
+
+.q-card{background:var(--card);border-radius:var(--radius);padding:28px 24px;box-shadow:var(--shadow-lg);margin-bottom:16px;animation:slideUp .35s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.q-num{font-size:12px;color:var(--text2);margin-bottom:8px}
+.q-tag{display:inline-block;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;margin-bottom:10px}
+.q-tag.c{background:#dbeafe;color:#1d4ed8}
+.q-tag.j{background:#fef3c7;color:#b45309}
+.q-tag.f{background:#ede9fe;color:#6d28d9}
+.q-tag.n{background:#d1fae5;color:#047857}
+.q-tag.s{background:#fce7f3;color:#be185d}
+.dark .q-tag.c{background:#1e3a5f;color:#93c5fd}
+.dark .q-tag.j{background:#78350f;color:#fcd34d}
+.dark .q-tag.f{background:#4c1d95;color:#c4b5fd}
+.dark .q-tag.n{background:#064e3b;color:#6ee7b7}
+.dark .q-tag.s{background:#831843;color:#f9a8d4}
+.q-text{font-size:18px;line-height:1.7;font-weight:500;margin-bottom:20px}
+
+/* Options as big cards */
+.q-opts{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.q-opts .opt{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;border:2px solid var(--border);cursor:pointer;font-size:15px;line-height:1.5;transition:all .15s;background:var(--bg)}
+.q-opts .opt:hover{border-color:var(--primary);background:var(--primary-light);transform:scale(1.01)}
+.q-opts .opt .letter{width:28px;height:28px;border-radius:8px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--text2);flex-shrink:0}
+.q-opts .opt.correct{background:var(--correct-bg);border-color:var(--correct);transform:scale(1.02)}
+.q-opts .opt.correct .letter{background:var(--correct);color:#fff;border-color:var(--correct)}
+.q-opts .opt.wrong{background:var(--wrong-bg);border-color:var(--wrong)}
+.q-opts .opt.wrong .letter{background:var(--wrong);color:#fff;border-color:var(--wrong)}
+.q-opts .opt.show-correct{background:var(--correct-bg);border-color:var(--correct)}
+.q-opts .opt.show-correct .letter{background:var(--correct);color:#fff;border-color:var(--correct)}
+.q-opts .opt.disabled{pointer-events:none;opacity:.8}
+
+/* Judge */
+.judge-btns{display:flex;gap:12px;margin-bottom:16px}
+.judge-btns button{flex:1;padding:14px;border-radius:12px;border:2px solid var(--border);cursor:pointer;font-size:16px;font-weight:600;background:var(--bg);transition:all .15s}
+.judge-btns button:hover{border-color:var(--primary);background:var(--primary-light)}
+.judge-btns button:disabled{cursor:default;opacity:.7}
+.judge-btns button.t{background:var(--correct-bg);border-color:var(--correct);color:var(--correct)}
+.judge-btns button.f{background:var(--wrong-bg);border-color:var(--wrong);color:var(--wrong)}
+
+.feedback{padding:14px 18px;border-radius:10px;font-size:14px;font-weight:600;margin-bottom:14px;display:none;animation:slideUp .25s ease}
+.feedback.show{display:block}
+.feedback.good{background:var(--correct-bg);color:var(--correct);display:block}
+.feedback.bad{background:var(--wrong-bg);color:var(--wrong);display:block}
+.feedback .exp{font-weight:400;font-size:13px;margin-top:6px;opacity:.85}
+
+/* Answer */
+.q-answer{display:none;padding:14px 18px;background:var(--primary-light);border-radius:10px;font-size:14px;line-height:1.7;margin-bottom:14px}
+.q-answer.show{display:block;animation:slideUp .25s ease}
+
+/* Nav */
+.quiz-nav{display:flex;gap:10px;justify-content:center}
+.quiz-nav button{padding:12px 32px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-p{background:var(--primary);color:#fff;border:none}
+.btn-p:hover{opacity:.9;transform:translateY(-1px)}
+.btn-p:disabled{opacity:.4;cursor:default;transform:none}
+.btn-g{background:transparent;border:1px solid var(--border);color:var(--text2)}
+.btn-g:hover{border-color:var(--primary);color:var(--primary)}
+
+/* Results */
+.result-card{background:var(--card);border-radius:var(--radius);padding:36px 28px;box-shadow:var(--shadow-lg);text-align:center;animation:slideUp .4s ease}
+.r-score{font-size:64px;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--correct));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.r-sub{font-size:16px;color:var(--text2);margin:6px 0 20px}
+.r-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:320px;margin:0 auto 24px}
+.r-item{padding:12px;background:var(--bg);border-radius:10px}
+.r-item .n{font-size:22px;font-weight:700}
+.r-item .n.g{color:var(--correct)}
+.r-item .n.r{color:var(--wrong)}
+.r-item .l{font-size:12px;color:var(--text2)}
+.r-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.r-actions button{padding:12px 24px;border-radius:10px;font-size:14px;cursor:pointer;transition:all .2s}
+
+/* Browse Mode */
+.b-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:all .2s}
+.b-card:hover{border-color:var(--primary);box-shadow:var(--shadow)}
+.b-card .q-text{font-size:14px;font-weight:400;margin-bottom:6px}
+.b-card .b-meta{display:flex;gap:8px;align-items:center;font-size:11px;color:var(--text2)}
+
+/* Wrong tab */
+.w-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.w-header span{font-size:14px;color:var(--text2)}
+.w-clear{padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text2);cursor:pointer;font-size:12px}
+
+/* Stats */
+.stats-hero{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.s-hero-item{background:var(--card);border-radius:var(--radius-sm);padding:16px;text-align:center;box-shadow:var(--shadow)}
+.s-hero-item .n{font-size:28px;font-weight:700;color:var(--primary)}
+.s-hero-item .l{font-size:12px;color:var(--text2);margin-top:2px}
+.stats-section{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px}
+.stats-section h3{font-size:15px;margin-bottom:12px}
+.ch-stat{margin-bottom:10px}
+.ch-stat .top{display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px}
+.ch-stat .top span:last-child{color:var(--text2)}
+.ch-stat .bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.ch-stat .bar .fill{height:100%;border-radius:3px;transition:width .5s;background:linear-gradient(90deg,#f59e0b,var(--correct))}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1f2937;color:#fff;padding:12px 24px;border-radius:12px;font-size:14px;z-index:999;opacity:0;transition:all .3s;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Footer */
+.footer{text-align:center;padding:20px;color:var(--text2);font-size:11px;border-top:1px solid var(--border)}
+
+@media(max-width:640px){
+  .container{padding:14px 12px 60px}
+  .hero-card{padding:20px 16px}
+  .hero-greeting{font-size:19px}
+  .quick-actions{grid-template-columns:1fr 1fr;gap:8px}
+  .chapter-grid{grid-template-columns:1fr}
+  .q-card{padding:20px 16px}
+  .q-text{font-size:16px}
+  .q-opts .opt{padding:12px 14px;font-size:14px}
+  .r-score{font-size:48px}
+  .stats-hero{grid-template-columns:repeat(3,1fr)}
+}
+
+@media print{
+  .header,.quiz-nav,.footer,.quick-actions,.hero-btn,.quiz-exit,.w-clear{display:none!important}
+  .q-card{box-shadow:none;border:1px solid #ddd;break-inside:avoid}
+  .q-answer{display:block!important}
+}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-inner">
+    <h1>🧬 细胞生物学</h1>
+    <div class="header-actions">
+      <button onclick="toggleDark()">🌙</button>
+    </div>
+  </div>
+</div>
+<div class="container" id="app"></div>
+<div class="footer">435题 · 细胞生物学题库</div>
+<div class="toast" id="toast"></div>
+
+<script src="data.js"></script>
+<script>
+// ====== Store ======
+const LS=(k,def)=> {try{const d=localStorage.getItem('cb_'+k);return d?JSON.parse(d):def}catch{return def}};
+const SS=(k,v)=> {try{localStorage.setItem('cb_'+k,JSON.stringify(v))}catch{}};
+
+let done=LS('done',{});
+let wrong=LS('wrong',[]);
+let streak=LS('streak',{count:0,date:''});
+
+function save(){SS('done',done);SS('wrong',wrong);SS('streak',streak);}
+
+// Streak calc
+function checkStreak(){
+  const today=new Date().toDateString();
+  if(streak.date===today) return;
+  const yesterday=new Date(Date.now()-86400000).toDateString();
+  if(streak.date===yesterday) streak.count++;
+  else streak.count=1;
+  streak.date=today;
+  save();
+}
+
+function buildId(ci,qi){return ci+'-'+qi}
+function findQ(qid){const[ci,qi]=qid.split('-').map(Number);const ch=QUESTION_BANK[ci];return ch?ch.questions[qi]:null}
+function getCh(qid){return parseInt(qid.split('-')[0])}
+
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+function toggleDark(){
+  const d=document.body.classList.toggle('dark');
+  SS('dark',d?'1':'0');
+}
+
+// Init
+(function(){
+  if(LS('dark','')==='1')document.body.classList.add('dark');
+  checkStreak();
+  renderHome();
+})();
+
+// ====== RENDER HOME ======
+function renderHome(){
+  const app=document.getElementById('app');
+  const totalQ=QUESTION_BANK.reduce((s,c)=>s+c.questions.length,0);
+  const doneCount=Object.keys(done).length;
+  const correctCount=Object.values(done).filter(v=>v==='correct').length;
+  const pct=doneCount?Math.round(correctCount/doneCount*100):0;
+  const days=streak.count;
+
+  let chCards='';
+  QUESTION_BANK.forEach((ch,ci)=>{
+    const d=ch.questions.filter((_,qi)=>done[buildId(ci,qi)]).length;
+    const c=ch.questions.filter((_,qi)=>done[buildId(ci,qi)]==='correct').length;
+    const p=d?Math.round(c/d*100):0;
+    const cls=p>=70?'green':p>=40?'blue':'orange';
+    chCards+=`<div class="ch-card" onclick="startQuiz(${ci})">
+      <div class="ch-name">${ch.chapter}</div>
+      <div class="ch-meta">${d}/${ch.questions.length} · ${p}%</div>
+      <div class="ch-bar"><div class="fill ${cls}" style="width:${d?Math.round(d/ch.questions.length*100):0}%"></div></div>
+    </div>`;
+  });
+
+  app.innerHTML=`
+    <div class="hero-card">
+      <div class="hero-greeting">${doneCount?'👋 继续学习':'🚀 开始学习'}</div>
+      <div class="hero-sub">${doneCount?`上次做到 ${doneCount}/${totalQ} 题，正确率 ${pct}%`:`共 ${totalQ} 道题，涵盖12章`}</div>
+      <div class="hero-stats">
+        <div><div class="num">${totalQ}</div><div class="lbl">总题数</div></div>
+        <div><div class="num">${doneCount}</div><div class="lbl">已做</div></div>
+        <div><div class="num">${pct}%</div><div class="lbl">正确率</div></div>
+        ${days?`<div><div class="num">${days}</div><div class="lbl">连续天数</div></div>`:''}
+      </div>
+      <button class="hero-btn" onclick="startQuiz(-1)">▶ 开始练习</button>
+    </div>
+    <div class="quick-actions">
+      <div class="quick-btn" onclick="wrong.length?goWrong():showToast('暂无错题')">
+        <div class="icon">❌</div>
+        <div class="title">错题本</div>
+        <div class="desc">${wrong.length} 道错题待复习</div>
+      </div>
+      <div class="quick-btn" onclick="shuffleQuiz()">
+        <div class="icon">🎲</div>
+        <div class="title">随机抽题</div>
+        <div class="desc">${doneCount?`${totalQ}题中随机`:'首次练习'}</div>
+      </div>
+      <div class="quick-btn" onclick="showStats()">
+        <div class="icon">📊</div>
+        <div class="title">学习统计</div>
+        <div class="desc">查看详细进度</div>
+      </div>
+      <div class="quick-btn" onclick="showBrowse()">
+        <div class="icon">📖</div>
+        <div class="title">浏览全部</div>
+        <div class="desc">按章节查看题目</div>
+      </div>
+    </div>
+    <div class="section-title">📚 各章进度</div>
+    <div class="chapter-grid">${chCards}</div>
+  `;
+}
+
+// ====== QUIZ ======
+let quizQ=[],quizI=0,quizAns=false,quizRes={c:0,w:0,t:0};
+
+function startQuiz(chIdx){
+  let pool=[];
+  QUESTION_BANK.forEach((ch,ci)=>{
+    if(chIdx>=0&&ci!==chIdx)return;
+    ch.questions.forEach((q,qi)=>pool.push({...q,_ch:ci,_qi:qi,_id:buildId(ci,qi)}));
+  });
+  pool.sort(()=>Math.random()-0.5);
+  if(pool.length>20)pool=pool.slice(0,20);
+  if(!pool.length)return;
+  quizQ=pool;quizI=0;quizRes={c:0,w:0,t:pool.length};quizAns=false;
+  renderQ();
+}
+
+function shuffleQuiz(){
+  let pool=[];
+  QUESTION_BANK.forEach((ch,ci)=>ch.questions.forEach((q,qi)=>pool.push({...q,_ch:ci,_qi:qi,_id:buildId(ci,qi)})));
+  pool.sort(()=>Math.random()-0.5);
+  if(pool.length>10)pool=pool.slice(0,10);
+  quizQ=pool;quizI=0;quizRes={c:0,w:0,t:pool.length};quizAns=false;
+  renderQ();
+}
+
+function goWrong(){
+  const items=wrong.map(qid=>{
+    const[ci,qi]=qid.split('-').map(Number);
+    const ch=QUESTION_BANK[ci];if(!ch||!ch.questions[qi])return null;
+    return {...ch.questions[qi],_ch:ci,_qi:qi,_id:qid};
+  }).filter(Boolean);
+  if(!items.length){showToast('暂无错题');return;}
+  quizQ=items;quizI=0;quizRes={c:0,w:0,t:items.length};quizAns=false;
+  renderQ();
+}
+
+function endQuiz(){quizQ=[];renderHome();}
+
+function renderQ(){
+  const app=document.getElementById('app');
+  if(!quizQ.length||quizI>=quizQ.length){showResults();return;}
+  const q=quizQ[quizI];
+  const pct=((quizI)/quizQ.length*100).toFixed(0);
+  const doneQ=done[q._id];
+
+  let opts='',judge='',fb='',ans='';
+  if(q.opts){
+    const an=(q.answer||'').replace(/[、．\s]/g,'').toUpperCase();
+    opts='<div class="q-opts">';
+    q.opts.forEach((o,i)=>{
+      const l=String.fromCharCode(65+i);
+      const correct=an===l||an===o.charAt(0).toUpperCase();
+      let cls='opt';
+      if(doneQ){
+        if(doneQ==='correct'&&correct)cls+=' correct';
+        else if(doneQ==='wrong'){
+          if(correct)cls+=' show-correct';
+          if((done[q._id+'_s']||'').toUpperCase()===l)cls+=' wrong';
+        }
+        cls+=' disabled';
+      }
+      opts+=`<div class="${cls}" data-idx="${i}"><span class="letter">${l}</span><span>${o.replace(/^[A-Za-z][、．\s]/,'')}</span></div>`;
+    });
+    opts+='</div>';
+  }
+  if(q.type==='判断题'){
+    judge=`<div class="judge-btns">
+      <button onclick="ansJudge('${q._id}','√')" ${doneQ?'disabled':''}>✅ 正确</button>
+      <button onclick="ansJudge('${q._id}','×')" ${doneQ?'disabled':''}>❌ 错误</button>
+    </div>`;
+    if(doneQ){
+      const cor=doneQ==='correct';
+      fb=`<div class="feedback ${cor?'good':'bad'} show">${cor?'✅ 正确！':'❌ 错了'} · 正确答案：${q.answer==='√'?'正确':'错误'}</div>`;
+    }
+  }
+  if(!judge){
+    ans=`<div id="qa" class="q-answer ${doneQ?'show':''}"><strong>答案：</strong>${getAns(q)}</div>`;
+  }
+
+  const tagCls={选择题:'c',判断题:'j',填空题:'f',名词解释:'n',简答题:'s',论述题:'s'}[q.type]||'c';
+
+  app.innerHTML=`
+    <div class="quiz-top">
+      <div class="quiz-progress">
+        <span class="count">${quizI+1}/${quizQ.length}</span>
+        <div class="quiz-bar"><div class="fill" style="width:${pct}%"></div></div>
+      </div>
+      <button class="quiz-exit" onclick="endQuiz()">✕ 退出</button>
+    </div>
+    <div class="q-card">
+      <div class="q-num">第 ${quizI+1} 题</div>
+      <span class="q-tag ${tagCls}">${q.type}</span>
+      <div class="q-text">${q.q}</div>
+      ${opts}
+      ${judge}
+      ${fb}
+      ${ans}
+      <div class="quiz-nav">
+        <button class="btn-g" onclick="prevQ()" ${quizI===0?'disabled':''}>←</button>
+        <button class="btn-p" id="nextBtn" onclick="nextQ()">${quizI<quizQ.length-1?'下一题':'结果'}</button>
+      </div>
+    </div>
+  `;
+
+  // 选择题绑定
+  if(q.opts&&!doneQ){
+    document.querySelectorAll('.q-opts .opt').forEach(el=>{
+      el.addEventListener('click',()=>ansChoice(q._id,parseInt(el.dataset.idx)));
+    });
+  }
+}
+
+function ansChoice(qid,idx){
+  if(quizAns||done[qid])return;
+  const q=findQ(qid);if(!q||!q.opts)return;
+  const an=(q.answer||'').replace(/[、．\s]/g,'').toUpperCase();
+  const l=String.fromCharCode(65+idx);
+  const correct=an===l||an===q.opts[idx].charAt(0).toUpperCase();
+  let ci=-1;
+  q.opts.forEach((o,i)=>{const l2=String.fromCharCode(65+i);if(an===l2||an===o.charAt(0).toUpperCase())ci=i;});
+  const els=document.querySelectorAll('.q-opts .opt');
+  els.forEach((el,i)=>{
+    el.classList.add('disabled');
+    if(i===idx)el.classList.add(correct?'correct':'wrong');
+    else if(i===ci&&!correct)el.classList.add('show-correct');
+  });
+  done[qid]=correct?'correct':'wrong';
+  done[qid+'_s']=l;
+  if(!correct&&!wrong.includes(qid))wrong.push(qid);
+  save();
+  quizAns=true;
+  quizRes[correct?'c':'w']++;
+  const fb=document.getElementById('qa');
+  if(fb)fb.classList.add('show');
+  document.getElementById('nextBtn').focus();
+}
+
+function ansJudge(qid,ans){
+  if(quizAns||done[qid])return;
+  const q=findQ(qid);if(!q)return;
+  const correct=ans===q.answer;
+  done[qid]=correct?'correct':'wrong';
+  if(!correct&&!wrong.includes(qid))wrong.push(qid);
+  save();
+  quizAns=true;
+  quizRes[correct?'c':'w']++;
+  document.querySelector('.judge-btns').innerHTML=
+    `<button class="${correct?'t':'f'}" disabled>${correct?'✅ 正确！':'❌ 应该是'+(q.answer==='√'?'正确':'错误')}</button>`;
+  const fb=document.getElementById('qa');
+  if(fb)fb.classList.add('show');
+  document.getElementById('nextBtn').focus();
+}
+
+function nextQ(){
+  if(!quizAns&&quizI<quizQ.length){
+    const q=quizQ[quizI];
+    if(q.type!=='填空题'&&q.type!=='名词解释'&&q.type!=='简答题'){showToast('请先回答本题');return;}
+  }
+  quizI++;quizAns=false;
+  if(quizI>=quizQ.length)showResults();
+  else renderQ();
+}
+
+function prevQ(){
+  if(quizI>0){quizI--;quizAns=!!done[quizQ[quizI]._id];renderQ();}
+}
+
+function showResults(){
+  const app=document.getElementById('app');
+  const p=quizRes.t?Math.round(quizRes.c/quizRes.t*100):0;
+  const emoji=p>=80?'🎉':p>=60?'👍':'💪';
+  app.innerHTML=`
+    <div class="result-card">
+      <div style="font-size:48px">${emoji}</div>
+      <div class="r-score">${p}%</div>
+      <div class="r-sub">${p>=80?'太棒了！':p>=60?'继续加油！':'需要更多练习'}</div>
+      <div class="r-grid">
+        <div class="r-item"><div class="n g">${quizRes.c}</div><div class="l">正确</div></div>
+        <div class="r-item"><div class="n r">${quizRes.w}</div><div class="l">错误</div></div>
+        <div class="r-item"><div class="n" style="color:var(--primary)">${quizRes.t}</div><div class="l">总题数</div></div>
+      </div>
+      <div class="r-actions">
+        <button class="btn-p" onclick="shuffleQuiz()" style="border:none">🔄 再来一轮</button>
+        ${quizRes.w?`<button class="btn-g" onclick="goWrong()">❌ 复习错题</button>`:''}
+        <button class="btn-g" onclick="renderHome()">🏠 首页</button>
+      </div>
+    </div>
+  `;
+}
+
+function getAns(q){
+  if(q.type==='选择题'&&q.opts){
+    const an=(q.answer||'').replace(/[、．\s]/g,'').toUpperCase();
+    for(const o of q.opts){if(an===o.charAt(0).toUpperCase()||q.answer.includes(o))return o;}
+  }
+  if(q.type==='判断题')return q.answer==='√'?'正确':'错误';
+  return q.answer||'';
+}
+
+// ====== BROWSE ======
+function showBrowse(){
+  const app=document.getElementById('app');
+  let html='<div class="section-title">📖 全部题目</div>';
+  QUESTION_BANK.forEach((ch,ci)=>{
+    const d=ch.questions.filter((_,qi)=>done[buildId(ci,qi)]).length;
+    html+=`<div style="font-size:14px;font-weight:600;margin:16px 0 8px;color:var(--primary)">${ch.chapter} (${ch.questions.length}题)</div>`;
+    ch.questions.forEach((q,qi)=>{
+      const qid=buildId(ci,qi);
+      const dd=done[qid];
+      const tagCls={选择题:'c',判断题:'j',填空题:'f',名词解释:'n',简答题:'s',论述题:'s'}[q.type]||'c';
+      html+=`<div class="b-card">
+        <span class="q-tag ${tagCls}" style="margin-bottom:4px">${q.type}</span>
+        <span style="float:right;font-size:12px;color:var(--text2)">${dd?dd==='correct'?'✅':'❌':''}</span>
+        <div class="q-text">${q.q}</div>
+      </div>`;
+    });
+  });
+  html+=`<div style="text-align:center;padding:12px"><button class="btn-g" onclick="renderHome()" style="padding:8px 24px;border-radius:10px">← 返回首页</button></div>`;
+  app.innerHTML=html;
+}
+
+// ====== STATS ======
+function showStats(){
+  const app=document.getElementById('app');
+  let tq=0,td=0,tc=0;
+  let chs=QUESTION_BANK.map((ch,ci)=>{
+    const d=ch.questions.filter((_,qi)=>done[buildId(ci,qi)]).length;
+    const c=ch.questions.filter((_,qi)=>done[buildId(ci,qi)]==='correct').length;
+    tq+=ch.questions.length;td+=d;tc+=c;
+    return{ch:ch.chapter,t:ch.questions.length,d,c};
+  });
+  const op=td?Math.round(tc/td*100):0;
+  const dp=Math.round(td/tq*100);
+  let html=`<div class="stats-hero">
+    <div class="s-hero-item"><div class="n">${tq}</div><div class="l">总题数</div></div>
+    <div class="s-hero-item"><div class="n">${td}</div><div class="l">已做题</div></div>
+    <div class="s-hero-item"><div class="n">${op}%</div><div class="l">正确率</div></div>
+  </div>
+  <div class="stats-section"><h3>📊 各章进度</h3>`;
+  chs.forEach(s=>{
+    const p=s.d?Math.round(s.c/s.d*100):0;
+    const bp=Math.round(s.d/s.t*100);
+    html+=`<div class="ch-stat">
+      <div class="top"><span>${s.ch}</span><span>${s.d}/${s.t} · ${p}%正确</span></div>
+      <div class="bar"><div class="fill" style="width:${bp}%"></div></div>
+    </div>`;
+  });
+  html+=`</div>
+  <div style="text-align:center;padding:8px">
+    <button class="btn-g" onclick="renderHome()" style="padding:8px 24px;border-radius:10px">← 返回首页</button>
+    <button onclick="if(confirm('重置所有记录？')){done={};wrong=[];save();showStats();}" style="margin-left:8px;padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text2);cursor:pointer;font-size:12px">重置</button>
+  </div>`;
+  app.innerHTML=html;
+}
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+  const k=e.key;
+  if(k>='1'&&k<='4'){
+    const el=document.querySelector('.q-opts .opt:not(.disabled)');
+    if(el){
+      const target=document.querySelector(`.q-opts .opt[data-idx="${parseInt(k)-1}"]:not(.disabled)`);
+      if(target)target.click();
+    }
+  }
+  if(k==='Enter'||k===' '){
+    const btn=document.getElementById('nextBtn');
+    if(btn&&!btn.disabled){e.preventDefault();btn.click();}
+  }
+  if(k==='Escape'){
+    const exit=document.querySelector('.quiz-exit');
+    if(exit)exit.click();
+  }
+});
+</script>
+</body>
+</html>
