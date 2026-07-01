@@ -382,6 +382,16 @@ function renderQ(){
     ans=`<div id="qa" class="q-answer ${doneQ?'show':''}"><strong>答案：</strong>${getAns(q)}</div>`;
   }
 
+  // 填空题/名词解释/简答题：显示答案按钮
+  let revealBtn='';
+  if(!q.opts && q.type!=='判断题'){
+    if(doneQ){
+      // 已经看过答案了，不显示按钮
+    } else {
+      revealBtn=`<div style="margin-bottom:12px"><button class="btn-g" onclick="revealAnswer('${q._id}')" style="padding:10px 20px;border-radius:8px;font-size:14px">💡 显示答案</button></div>`;
+    }
+  }
+
   const tagCls={选择题:'c',判断题:'j',填空题:'f',名词解释:'n',简答题:'s',论述题:'s'}[q.type]||'c';
 
   app.innerHTML=`
@@ -399,6 +409,7 @@ function renderQ(){
       ${opts}
       ${judge}
       ${fb}
+      ${revealBtn}
       ${ans}
       <div class="quiz-nav">
         <button class="btn-g" onclick="prevQ()" ${quizI===0?'disabled':''}>←</button>
@@ -453,6 +464,17 @@ function ansJudge(qid,ans){
     `<button class="${correct?'t':'f'}" disabled>${correct?'✅ 正确！':'❌ 应该是'+(q.answer==='√'?'正确':'错误')}</button>`;
   const fb=document.getElementById('qa');
   if(fb)fb.classList.add('show');
+  document.getElementById('nextBtn').focus();
+}
+
+function revealAnswer(qid){
+  const q=findQ(qid);if(!q)return;
+  const el=document.getElementById('qa');
+  if(el)el.classList.add('show');
+  done[qid]='seen';
+  if(!wrong.includes(qid))wrong.push(qid);
+  save();
+  quizAns=true;
   document.getElementById('nextBtn').focus();
 }
 
